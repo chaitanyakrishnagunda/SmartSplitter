@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  groups    GroupMember[]
+  paidBills Bill[]
+  createdAt DateTime @default(now())
+}
+
+model Group {
+  id        String        @id @default(cuid())
+  name      String
+  members   GroupMember[]
+  bills     Bill[]
+  createdAt DateTime      @default(now())
+}
+
+model GroupMember {
+  id       String  @id @default(cuid())
+  groupId  String
+  group    Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  nickname String
+}
+
+model Bill {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  paidById    String
+  paidBy      User     @relation(fields: [paidById], references: [id], onDelete: Cascade)
+  totalAmount Float
+  imageUrl    String?
+  rawItems    Json
+  splits      Split[]
+  chatHistory Json     @default("[]")
+  createdAt   DateTime @default(now())
+}
+
+model Split {
+  id             String @id @default(cuid())
+  billId         String
+  bill           Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+  memberNickname String
+  items          Json
+  totalOwed      Float
+}
