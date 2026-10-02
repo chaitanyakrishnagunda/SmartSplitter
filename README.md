@@ -1,48 +1,72 @@
-# SplitSmart
+# SplitSmart — AI-Powered Bill Splitting
 
-AI-powered bill splitting for groups.  
-SplitSmart lets you upload receipt images, extract line items with AI, discuss split logic in natural language, confirm final splits, and view simplified balances.
+SplitSmart lets groups upload a receipt, extract line items with AI, discuss splits in natural language, and get simplified balances. Built to make group expenses painless.
 
-## Features
 
-- Google sign-in with `next-auth`
-- Create groups and add members (including display-only members without accounts)
-- Upload bill images (JPEG/PNG) to Supabase Storage
-- AI receipt parsing using OpenAI vision model
-- Chat-based split negotiation (natural language -> structured split JSON)
-- Confirmed splits persisted per bill
-- Group-level balance calculations with simplified debt recommendations
+## What it does
 
-## Tech Stack
+- Upload receipt images (JPEG/PNG)
+- AI receipt parsing with OpenAI vision — line items, prices, tax, total
+- Chat-based split negotiation: natural language → structured split JSON
+- Group balances with simplified debt settlement
+- Google sign-in, groups, members
 
-- **Frontend / App:** Next.js 14 (App Router), React 18, TypeScript
-- **Auth:** NextAuth (Google Provider, JWT sessions)
-- **Database:** PostgreSQL + Prisma
-- **Storage:** Supabase Storage
-- **AI:** Vercel AI SDK + OpenAI (`gpt-4o`)
-- **UI:** Tailwind CSS + Radix UI + shadcn-style components
-- **Validation / State:** Zod, Zustand
+## AI details
 
-## Project Structure
+- **Receipt parsing:** Vision model extracts structured items from receipt image. Prompt enforces JSON schema with fallback for low-confidence items.
+- **Split chat:** User message like "Alice paid, Bob owes half of pizza" → LLM returns validated split JSON via Zod. Handles ambiguous requests by asking clarifying questions.
+- **Reliability:** Structured outputs + validation to reduce hallucinations in amounts.
 
-```text
+## Tech stack
+
+- Next.js 14 (App Router), React 18, TypeScript
+- Vercel AI SDK + OpenAI gpt-4o
+- NextAuth (Google), Prisma + PostgreSQL
+- Supabase Storage for receipt images
+- Tailwind + shadcn/ui, Zod, Zustand
+
+## How to run
+
+1. Clone and install:
+```
+git clone https://github.com/chaitanyakrishnagunda/SmartSplitter.git
+cd SmartSplitter
+npm install
+```
+
+2. Set env (see `.env.example`):
+```
+DATABASE_URL=
+NEXTAUTH_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+OPENAI_API_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+3. Run:
+```
+npx prisma migrate dev
+npm run dev
+```
+
+Open http://localhost:3000
+
+## Project structure
+
+```
 src/
-  app/
-    page.tsx                          # Landing + Google sign-in
-    dashboard/page.tsx                # Group overview
-    groups/[id]/page.tsx              # Group details, members, balances, bills
-    groups/[id]/bills/new/page.tsx    # Bill creation wizard
-    groups/[id]/bills/[billId]/page.tsx # Bill detail + chat + confirmed splits
-    api/
-      auth/[...nextauth]/route.ts
-      groups/route.ts
-      groups/[id]/members/route.ts
-      groups/[id]/balances/route.ts
-      bills/upload/route.ts
-      bills/parse/route.ts
-      bills/[id]/chat/route.ts
-      bills/[id]/confirm/route.ts
-  components/
-  lib/
-prisma/
-  schema.prisma
+  app/ — pages + API routes
+    groups/[id]/ — group details, balances
+    groups/[id]/bills/ — bill wizard, chat, confirm
+    api/bills/parse — AI receipt parsing
+    api/bills/[id]/chat — split negotiation
+  components/ — UI
+  lib/ — AI prompts, utils
+prisma/ — schema
+```
+
+## Author
+
+Chaitanya Krishna Gunda — MS Data Science, Stevens Institute of Technology. Focused on GenAI / LLM apps.
